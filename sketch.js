@@ -1,91 +1,108 @@
-// RANDOM VARS
-var imgMan;
-var imgWoman;
-var imgManBlue;
-var imgWomanBlue;
-var imgManGreen;
-var imgWomanGreen;
+// set up the code in the text
+var input;
 
+// RANDOM VARS
+
+
+// FUNCTIONS
+
+async function obtainCode(query, element = 0) {
+    url = `https://api.idescat.cat/pob/v1/sug.json?p=q/${query};tipus/mun,np`
+    const response = await fetch(url);
+    const data = await response.json();
+
+    //return data;
+    const citySelected = data[1][0]
+    console.log(citySelected)
+    document.getElementById("code").textContent = citySelected
+    urlSearch = `https://api.idescat.cat/pob/v1/cerca.json?p=q/${citySelected};tipus/mun`
+    const responseSearch = await fetch(urlSearch);
+    const dataSearch = await responseSearch.json();
+    const cityCode = dataSearch["feed"]["entry"]["cross:DataSet"]["cross:Section"]["AREA"]
+    return cityCode;
+}
 
 // MUNICIPILATIES DATTA
 //mId = "082704"
-async function getPob(mId){
+async function getPob(mId) {
     const url = `https://api.idescat.cat/emex/v1/dades.json?id=${mId}&i=f321`
     const response = await fetch(url);
     // await
     const data = await response.json();
     const pobString = data["fitxes"]["indicadors"]["i"][0]["v"];
     const res = pobString.split(",");
-    const stringPobValue = res[0]; 
+    const stringPobValue = res[0];
     const intPobValue = parseInt(stringPobValue);
-   return intPobValue;
+    return intPobValue;
 }
 
 // VAXX DATA
 
-async function getVaxxPage(offset,limit,id){
+
+
+async function getVaxxPage(offset, limit, id) {
     const url = `https://analisi.transparenciacatalunya.cat/resource/irki-p3c7.json?municipi_codi=${id}&$limit=${limit}&$offset=${offset}&$order=data`
     const response = await fetch(url);
     const data = await response.json();
     return data
-  }
+}
 
 // check pagination info here
 // https://dev.socrata.com/docs/paging.html
 
-async function getVaxxTotal(id){
-      const initLimit = 100;
-      const initOffset = 0;
-      var dataArr = [];
-      const firstResponse = await getVaxxPage(initOffset, initLimit, id);
-      dataArr.push(firstResponse);
-      var newOffset = initLimit;
-      var curr_len_arr = dataArr[dataArr.length - 1].length;
-      do {
+async function getVaxxTotal(id) {
+    const initLimit = 100;
+    const initOffset = 0;
+    var dataArr = [];
+    const firstResponse = await getVaxxPage(initOffset, initLimit, id);
+    dataArr.push(firstResponse);
+    var newOffset = initLimit;
+    var curr_len_arr = dataArr[dataArr.length - 1].length;
+    do {
         let currentResponse = await getVaxxPage(newOffset, initLimit, id);
         dataArr.push(currentResponse);
-        var newOffset = newOffset+initLimit;
+        var newOffset = newOffset + initLimit;
         var curr_len_arr = currentResponse.length;
-      }
-      while (curr_len_arr > 0);
-  
-      return dataArr
-  }
-  
-// see here https://stackoverflow.com/questions/35974976/json-group-by-count-output-to-key-value-pair-json-result
-function parseData(rows){
-    var finalOccs = {
-      "Dona" : {
-        "1" : 0,
-        "2": 0
-      },
-      "Home" : {
-        "1" : 0,
-        "2": 0
-      }
     }
-    
-    var occurences = rows.reduce(function (r, row) {
-      const prev = r[row.sexe][row.dosi]
-      const currValue = parseInt(row.recompte)
-      r[row.sexe][row.dosi] = prev + currValue
-      return r;
+    while (curr_len_arr > 0);
+
+    return dataArr
+}
+
+// see here https://stackoverflow.com/questions/35974976/json-group-by-count-output-to-key-value-pair-json-result
+function parseData(rows) {
+    var finalOccs = {
+        "Dona": {
+            "1": 0,
+            "2": 0
+        },
+        "Home": {
+            "1": 0,
+            "2": 0
+        }
+    }
+
+    var occurences = rows.reduce(function(r, row) {
+        const prev = r[row.sexe][row.dosi]
+        const currValue = parseInt(row.recompte)
+        r[row.sexe][row.dosi] = prev + currValue
+        return r;
     }, finalOccs);
-  
+
     return occurences;
 }
-  
+
 // drawing functions
 
-function randomFromArray(x){
-    var item = x[Math.floor(Math.random()*x.length)];
+function randomFromArray(x) {
+    var item = x[Math.floor(Math.random() * x.length)];
     return item
 }
 
-function drawHuman(sex, typeColor, x, y){
+function drawHuman(sex, typeColor, x, y) {
     if (sex === "woman") {
         //console.log(typeof(type));
-        switch(typeColor) {
+        switch (typeColor) {
             case "blue":
                 //console.log("djfjshdkj")
                 image(imgWomanBlue, x, y, 100, 100);
@@ -96,9 +113,9 @@ function drawHuman(sex, typeColor, x, y){
             default:
                 image(imgWoman, x, y, 100, 100);
                 break;
-          }
+        }
     } else {
-        switch(typeColor) {
+        switch (typeColor) {
             case "blue":
                 image(imgManBlue, x, y, 100, 100);
                 break;
@@ -108,11 +125,14 @@ function drawHuman(sex, typeColor, x, y){
             default:
                 image(imgMan, x, y, 100, 100);
                 break;
-          }
+        }
     }
 }
 
-async function getAllData(id){
+async function getAllData(cityNameInput) {
+    const id = await obtainCode(cityNameInput);
+    console.log(id)
+
     // why does this happen IDK!
     // the population idescat api is using a longer code than the vaxx api
     var idCodeShort = id.slice(0, -1);
@@ -126,12 +146,12 @@ async function getAllData(id){
     var resNumbers = parseData(responseResMerged);
 
     // this is not true, to update
-    var womenPercent = womenPercent = resNumbers.Dona["1"] / 
-                    (resNumbers.Dona["1"] + resNumbers.Home["1"]);
-    var menPercent = 1-womenPercent;
+    var womenPercent = womenPercent = resNumbers.Dona["1"] /
+        (resNumbers.Dona["1"] + resNumbers.Home["1"]);
+    var menPercent = 1 - womenPercent;
 
-    var all1d =  resNumbers.Dona["1"] + resNumbers.Home["1"]
-    var all2d =  resNumbers.Dona["2"] + resNumbers.Home["2"]
+    var all1d = resNumbers.Dona["1"] + resNumbers.Home["1"]
+    var all2d = resNumbers.Dona["2"] + resNumbers.Home["2"]
     var greenPercent = all2d / totalPob
     var bluePercent = (all1d - all2d) / totalPob
 
@@ -144,22 +164,22 @@ async function getAllData(id){
 }
 
 
-function drawAll(menPercent,greenPercent,bluePercent){
+function drawAll(menPercent, greenPercent, bluePercent) {
     // grid params
-    gridX = [0,50,100,150,200,250,300,350,400,450] 
-    gridY = [0,100,200,300,400,500,600] 
-    
+    gridX = [0, 50, 100, 150, 200, 250, 300, 350, 400, 450]
+    gridY = [0, 100, 200, 300, 400, 500, 600]
+
     // population params
     // var menPercent = .5;
     var totalSize = gridX.length * gridY.length;
     // will this always give equal to size?
-    var menSize = Math.floor(totalSize*menPercent)
-    
+    var menSize = Math.floor(totalSize * menPercent)
+
     // var greenPercent = 0.1;
     // var bluePercent = 0.2;
     //var greenPercent = 0.1;
-    var greenSize = Math.floor(totalSize*greenPercent)
-    var blueSize = Math.floor(totalSize*bluePercent)
+    var greenSize = Math.floor(totalSize * greenPercent)
+    var blueSize = Math.floor(totalSize * bluePercent)
 
     var arraySex = [];
     var arrayXCoord = [];
@@ -167,15 +187,15 @@ function drawAll(menPercent,greenPercent,bluePercent){
     var colorHuman = [];
 
     //drawHuman("woman","blue",200,200);
-    colorArr = ["djfhs","blue","green"]
-    //drawHuman("woman", "blue", 200, 200);
+    colorArr = ["djfhs", "blue", "green"]
+        //drawHuman("woman", "blue", 200, 200);
     gridY.forEach(i => {
         gridX.forEach(k => {
             //first push the arrays which are the easy part
             arrayXCoord.push(k);
             arrayYCoord.push(i);
             // now the mess
-            if (colorHuman.length >= (greenSize+blueSize)){
+            if (colorHuman.length >= (greenSize + blueSize)) {
                 colorHuman.push("yellow");
             } else if (colorHuman.length >= greenSize) {
                 colorHuman.push("blue");
@@ -183,34 +203,111 @@ function drawAll(menPercent,greenPercent,bluePercent){
                 colorHuman.push("green");
             }
             // this is horrible (and prolly wrong)
-            if (arraySex.length >= menSize){
+            if (arraySex.length >= menSize) {
                 arraySex.push("man");
             } else {
                 arraySex.push("woman");
-            } 
+            }
         });
     });
-    
+
     // shuffle sex?
     let shuffledarraySex = arraySex.sort((a, b) => 0.5 - Math.random());
 
     // const array = ["one", "two", "three"]
-    shuffledarraySex.forEach(function (item, index) {
+    shuffledarraySex.forEach(function(item, index) {
         drawHuman(item,
-             colorHuman[index],
-             arrayXCoord[index],
-             arrayYCoord[index]);
+            colorHuman[index],
+            arrayXCoord[index],
+            arrayYCoord[index]);
         //console.log(item, index);
     });
 
 }
 
-var input;
-var idCode = "082606";
+function percent2Text(percent) {
+    const numBig = Math.round(percent * 100);
+    const numStr = numBig + "%";
+    return numStr
+}
+
+// the x and y max and min arguments refer to positions in the canvas.
+function makeBarPlot(percentArray, xmin, xmax, spacer = 0, ymin, ymax, colorsArray, textSpacer = -5) {
+
+    const totalLength = xmax - xmin;
+    const barWidth = (totalLength / percentArray.length) - spacer
+
+    // set up the left positions of the columns
+    var xLeftArray = [];
+    xLeftArray[0] = xmin;
+    var i;
+    for (i = 1; i < percentArray.length; i++) {
+        xLeftArray[i] = xLeftArray[i - 1] + barWidth + spacer;
+    }
+    // now the right pos
+    var xWidthArray = [];
+    var i;
+    for (i = 0; i < percentArray.length; i++) {
+        xWidthArray[i] = barWidth;
+    }
+
+    const totalHeight = ymax - ymin;
+
+    // re-scale 
+    const maxValue = Math.max(...percentArray);
+    var percentsRescaled = [];
+    var i;
+    for (i = 0; i < percentArray.length; i++) {
+        percentsRescaled[i] = percentArray[i] / maxValue;
+    }
+    var yLowArray = [];
+    var i;
+    for (i = 0; i < percentArray.length; i++) {
+        yLowArray[i] = ymin;
+    }
+    var yHeightArray = [];
+    var i;
+    for (i = 0; i < percentArray.length; i++) {
+        yHeightArray[i] = percentsRescaled[i] * totalHeight;
+    }
+
+    // draw final plot
+    var i;
+    for (i = 0; i < percentArray.length; i++) {
+        var c = color(colorsArray[i]);
+        fill(c);
+        noStroke();
+        rect(xLeftArray[i], yLowArray[i], xWidthArray[i], yHeightArray[i]);
+        textSize(28);
+        var wordText = percent2Text(percentArray[i]);
+        text(wordText, xLeftArray[i], yLowArray[i] + yHeightArray[i] + textSpacer);
+        //yHighArray[i] = ymin + (percentArray[i] * totalHeight);
+    }
+}
+
+fullWorkflow = function() {
+    setup();
+    var cityName = input.value();
+    getAllData(cityName).then(results => {
+        // first the figure portion
+        drawAll(results.men, results.green, results.blue);
+        // second the barplot
+        tmp_yell = 1 - results.green - results.blue
+        colors_array = ['#8AE234', '#729FCF', '#FCE94F'];
+        makeBarPlot([results.green, results.blue, tmp_yell], 600, 800, 10, 700, 200, colors_array);
+    }).catch(err => console.error(err));
+}
 
 
-function setup() {
-    createCanvas(600, 800);
+
+////////////////////////////////////
+////////////////////////////////////
+
+
+setup = function() {
+    myCanvas = createCanvas(800, 800);
+    myCanvas.parent('canvasDiv');
+    myCanvas;
     frameRate(1);
     imgMan = loadImage('img/man_yellow.svg');
     imgWoman = loadImage('img/woman_yellow.svg');
@@ -219,24 +316,15 @@ function setup() {
     imgManGreen = loadImage('img/man_green.svg');
     imgWomanGreen = loadImage('img/woman_green.svg');
 
-    document.getElementById("code").
-    textContent += idCode;
-  }
+}
+draw = function() {
 
-function draw() {
-
-    input = select("#cdeIN")
+    input = select("#codeX");
+    console.log(input.value());
 
     var button = select('#submit');
-    //button.mousePressed(setIdCode);
+    button.mousePressed(fullWorkflow);
 
-    getAllData(idCode).then(results => {
-        drawAll(results.men, results.green, results.blue); 
-    }).catch(err=> console.error(err));
-
-    //drawHuman("woman", "blue", 100, 100);
     noLoop();
+
 }
-
-
-
