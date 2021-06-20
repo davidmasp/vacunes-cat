@@ -17,7 +17,7 @@ both with a representative plot and a bar chart. The number of male and female
 figures represents the number of doses given to women and men (probably not
 the most straight-forward design). This image is from 20th of June.
 
-![example](example.png)
+<img src="example.png" width="400">
 
 This website is only a client-side application that queries a couple of
 databases offered by the
