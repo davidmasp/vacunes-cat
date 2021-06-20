@@ -3,6 +3,7 @@ var input;
 
 // RANDOM VARS
 
+// this is a comment"""
 
 // FUNCTIONS
 
@@ -14,7 +15,7 @@ async function obtainCode(query, element = 0) {
     //return data;
     const citySelected = data[1][0]
     console.log(citySelected)
-    document.getElementById("code").textContent = citySelected
+    document.getElementById("municipi").textContent = citySelected
     urlSearch = `https://api.idescat.cat/pob/v1/cerca.json?p=q/${citySelected};tipus/mun`
     const responseSearch = await fetch(urlSearch);
     const dataSearch = await responseSearch.json();
