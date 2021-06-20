@@ -312,8 +312,8 @@ fullWorkflow = function() {
         drawAll(results.men, results.green, results.blue);
         // second the barplot
         tmp_yell = 1 - results.green - results.blue
-        colors_array = ['#8AE234', '#729FCF', '#FCE94F'];
-        lg_posX_arr = [200, 400, 600];
+        colors_array = ['#8AE234', '#729FCF', '#AD7FA8'];
+        lg_posX_arr = [200, 400, 575];
         lg_posY_arr = [750, 750, 750];
         lg_labels = ["Dues dosi", "Una dosi", "Sense vacunar"];
         percent_array = [results.green, results.blue, tmp_yell]
