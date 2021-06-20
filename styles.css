@@ -5,7 +5,13 @@
     padding: 10px;
 }
 
-.row {
+canvas {
+    margin-right: auto;
+    margin-left: auto;
+    display: block;
+}
+
+.col-6 {
     border: 5px solid #FFFF00;
 }
 
@@ -14,35 +20,22 @@ body {
 }
 
 #tt1 {
-    position: absolute;
-    width: 852px;
-    height: 44px;
-    left: 294px;
-    top: 86px;
     font-family: Montserrat;
     font-style: normal;
     font-weight: 600;
     font-size: 36px;
     line-height: 44px;
+    text-align: center;
     /* identical to box height */
     color: #000000;
 }
 
 #municipi {
-    position: absolute;
-    width: 152px;
-    height: 59px;
-    left: 644px;
-    top: 130px;
     font-family: Montserrat;
     font-style: normal;
     font-weight: 600;
-    font-size: 48px;
+    font-size: 50px;
     line-height: 59px;
-    /* identical to box height */
-    display: flex;
-    align-items: center;
-    text-align: center;
     color: #000000;
 }
 

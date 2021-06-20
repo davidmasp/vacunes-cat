@@ -233,7 +233,18 @@ function percent2Text(percent) {
 }
 
 // the x and y max and min arguments refer to positions in the canvas.
-function makeBarPlot(percentArray, xmin, xmax, spacer = 0, ymin, ymax, colorsArray, textSpacer = -5) {
+function makeBarPlot(percentArray,
+    xmin,
+    xmax,
+    spacer = 0,
+    ymin,
+    ymax,
+    colorsArray,
+    legendsXArray,
+    legendsYArray,
+    legendsLabelArray,
+    textSpacer = -5
+) {
 
     const totalLength = xmax - xmin;
     const barWidth = (totalLength / percentArray.length) - spacer
@@ -272,6 +283,8 @@ function makeBarPlot(percentArray, xmin, xmax, spacer = 0, ymin, ymax, colorsArr
         yHeightArray[i] = percentsRescaled[i] * totalHeight;
     }
 
+    const legendWidth = 30;
+
     // draw final plot
     var i;
     for (i = 0; i < percentArray.length; i++) {
@@ -282,7 +295,12 @@ function makeBarPlot(percentArray, xmin, xmax, spacer = 0, ymin, ymax, colorsArr
         textSize(28);
         var wordText = percent2Text(percentArray[i]);
         text(wordText, xLeftArray[i], yLowArray[i] + yHeightArray[i] + textSpacer);
-        //yHighArray[i] = ymin + (percentArray[i] * totalHeight);
+        square(legendsXArray[i], legendsYArray[i], legendWidth);
+        text(
+            legendsLabelArray[i],
+            legendsXArray[i] + legendWidth + 3,
+            legendsYArray[i] + legendWidth
+        );
     }
 }
 
@@ -295,18 +313,20 @@ fullWorkflow = function() {
         // second the barplot
         tmp_yell = 1 - results.green - results.blue
         colors_array = ['#8AE234', '#729FCF', '#FCE94F'];
-        makeBarPlot([results.green, results.blue, tmp_yell], 600, 800, 10, 700, 200, colors_array);
+        lg_posX_arr = [200, 400, 600];
+        lg_posY_arr = [750, 750, 750];
+        lg_labels = ["Dues dosi", "Una dosi", "Sense vacunar"];
+        percent_array = [results.green, results.blue, tmp_yell]
+        makeBarPlot(percent_array, 600, 900, 15, 700, 100, colors_array, lg_posX_arr, lg_posY_arr, lg_labels);
     }).catch(err => console.error(err));
 }
-
-
 
 ////////////////////////////////////
 ////////////////////////////////////
 
 
 setup = function() {
-    myCanvas = createCanvas(800, 800);
+    myCanvas = createCanvas(900, 800);
     myCanvas.parent('canvasDiv');
     myCanvas;
     frameRate(1);
